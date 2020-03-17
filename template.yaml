@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  kinesis-api
+
+  Sample SAM Template for kinesis-api
+
+Parameters:
+  StorageBucketName:
+    Type: String
+
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Runtime: python3.7
+    Handler: index.handler
+    Timeout: 3
+    Environment:
+      Variables:
+        storage_bucket: !Ref StorageBucketName
+
+Resources:
+  UploadTrigger:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: './handlers/upload_trigger'
+      Timeout: 60
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Resource: '*'
+              Action:
+                - s3:*
+      Events:
+        UploadTriggerEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref StorageBucketName
+            Events: s3:ObjectCreated:*
+Outputs:
